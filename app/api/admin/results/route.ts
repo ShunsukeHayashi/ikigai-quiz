@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { UserResult } from '@/app/types'
+import { UserResult, User, Answer, Result, CategoryStat } from '@/app/types'
 
 export async function GET() {
   try {
@@ -27,13 +27,13 @@ export async function GET() {
     })
 
     // レスポンスデータの整形
-    const formattedResults: UserResult[] = users.map(user => ({
+    const formattedResults: UserResult[] = users.map((user: User) => ({
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
       },
-      answers: user.answers.map(answer => ({
+      answers: user.answers.map((answer: Answer) => ({
         id: answer.id,
         quizId: answer.quizId,
         selected: answer.selected,
@@ -47,15 +47,15 @@ export async function GET() {
           correctOption: answer.quiz.correctOption,
         },
       })),
-      results: user.results.map(result => ({
+      results: user.results.map((result: Result) => ({
         category: result.category,
         score: result.score,
       })),
       summary: {
         totalQuestions: user.answers.length,
-        correctAnswers: user.answers.filter(a => a.correct).length,
+        correctAnswers: user.answers.filter((a: Answer) => a.correct).length,
         averageScore: Math.round(
-          (user.answers.filter(a => a.correct).length / user.answers.length) * 100 || 0
+          (user.answers.filter((a: Answer) => a.correct).length / user.answers.length) * 100 || 0
         ),
       },
     }))
@@ -73,16 +73,16 @@ export async function GET() {
 
     return NextResponse.json({
       users: formattedResults,
-      categoryStats: categoryStats.map(stat => ({
+      categoryStats: categoryStats.map((stat: CategoryStat) => ({
         category: stat.category,
         averageScore: Math.round(stat._avg.score || 0),
         totalUsers: stat._count.score,
       })),
       totalUsers: users.length,
       overallStats: {
-        totalAnswers: users.reduce((acc, user) => acc + user.answers.length, 0),
+        totalAnswers: users.reduce((acc: number, user: User) => acc + user.answers.length, 0),
         correctAnswers: users.reduce(
-          (acc, user) => acc + user.answers.filter(answer => answer.correct).length,
+          (acc: number, user: User) => acc + user.answers.filter((answer: Answer) => answer.correct).length,
           0
         ),
       },
@@ -133,7 +133,7 @@ export async function POST(request: Request) {
         name: user.name,
         email: user.email,
       },
-      answers: user.answers.map(answer => ({
+      answers: user.answers.map((answer: Answer) => ({
         id: answer.id,
         quizId: answer.quizId,
         selected: answer.selected,
@@ -147,15 +147,15 @@ export async function POST(request: Request) {
           correctOption: answer.quiz.correctOption,
         },
       })),
-      results: user.results.map(result => ({
+      results: user.results.map((result: Result) => ({
         category: result.category,
         score: result.score,
       })),
       summary: {
         totalQuestions: user.answers.length,
-        correctAnswers: user.answers.filter(a => a.correct).length,
+        correctAnswers: user.answers.filter((a: Answer) => a.correct).length,
         averageScore: Math.round(
-          (user.answers.filter(a => a.correct).length / user.answers.length) * 100 || 0
+          (user.answers.filter((a: Answer) => a.correct).length / user.answers.length) * 100 || 0
         ),
       },
     }
