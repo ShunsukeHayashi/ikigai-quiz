@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IkigAI Quiz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Previous styles remain the same until .quiz-container */
+        
+        .quiz-container {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-blue);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo span.iki {
+            color: var(--primary-orange);
+        }
+
+        .logo span.g {
+            color: var(--primary-green);
+        }
+
+        .logo span.ai {
+            background: linear-gradient(45deg, var(--primary-pink), var(--primary-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo span.quiz {
+            background: linear-gradient(45deg, var(--primary-blue), var(--primary-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 20px;
+        }
+
+        .results-container {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .results-title {
+            font-size: 32px;
+            color: var(--primary-blue);
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+
+        .results-score {
+            font-size: 48px;
+            color: var(--primary-green);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .results-feedback {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .review-answers {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .review-item {
+            text-align: left;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .review-item.correct {
+            border-left: 4px solid var(--primary-green);
+        }
+
+        .review-item.incorrect {
+            border-left: 4px solid var(--primary-pink);
+        }
+
+        .restart-button {
+            padding: 12px 24px;
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .restart-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.2);
+        }
+
+        /* Previous styles remain the same after this */
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="logo">
+            <span class="iki">Iki</span><span class="g">g</span><span class="ai">AI</span>
+            <span class="quiz">クイズ</span>
+        </div>
+        
+        <div class="pixel-decoration pixel-1"></div>
+        <div class="pixel-decoration pixel-2"></div>
+        <div class="pixel-decoration pixel-3"></div>
+        <div class="pixel-decoration pixel-4"></div>
+        
+        <div class="progress">Question <span id="current">1</span>/18</div>
+        
+        <div id="quiz-content">
+            <div id="question-content" class="fade">
+                <div class="question-number">Q.1</div>
+                <div class="question-text">Ikigaism「〇〇であれ」</div>
+                
+                <div class="options">
+                    <div class="option">1. 誠実</div>
+                    <div class="option">2. 真摯</div>
+                    <div class="option">3. 真面目</div>
+                    <div class="option">4. 論理的</div>
+                </div>
+            </div>
+            
+            <div class="navigation">
+                <button class="nav-button" id="prev" disabled>← Previous</button>
+                <button class="nav-button" id="next">Next →</button>
+            </div>
+        </div>
+
+        <div id="results-content" class="results-container">
+            <div class="results-title">Quiz Complete!</div>
+            <div class="results-score">0/18</div>
+            <div class="results-feedback">
+                Thank you for completing the IkigAI Quiz!
+            </div>
+            <div class="review-answers">
+                <!-- Review answers will be inserted here -->
+            </div>
+            <button class="restart-button">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        // Previous questions array remains the same
+
+        let currentQuestion = 0;
+        let selectedAnswers = new Array(questions.length).fill(null);
+
+        function updateQuestion() {
+            const question = questions[currentQuestion];
+            const content = document.getElementById('question-content');
+            
+            const newContent = `
+                <div class="question-number">Q.${question.number}</div>
+                <div class="question-text">${question.text}</div>
+                <div class="options">
+                    ${question.options.map((option, index) => `
+                        <div class="option ${selectedAnswers[currentQuestion] === index ? 'selected' : ''}" 
+                             data-index="${index}">
+                            ${index + 1}. ${option}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            content.innerHTML = newContent;
+            content.classList.remove('fade');
+            void content.offsetWidth;
+            content.classList.add('fade');
+
+            document.getElementById('current').textContent = currentQuestion + 1;
+            document.getElementById('prev').disabled = currentQuestion === 0;
+            document.getElementById('next').textContent = 
+                currentQuestion === questions.length - 1 ? 'Finish' : 'Next →';
+            
+            document.querySelectorAll('.option').forEach(option => {
+                option.addEventListener('click', () => selectOption(parseInt(option.dataset.index)));
+            });
+        }
+
+        function selectOption(index) {
+            selectedAnswers[currentQuestion] = index;
+            document.querySelectorAll('.option').forEach(option => {
+                option.classList.remove('selected');
+                if (parseInt(option.dataset.index) === index) {
+                    option.classList.add('selected');
+                }
+            });
+        }
+
+        function showResults() {
+            const quizContent = document.getElementById('quiz-content');
+            const resultsContent = document.getElementById('results-content');
+            
+            quizContent.style.display = 'none';
+            resultsContent.style.display = 'block';
+
+            const correctAnswers = selectedAnswers.reduce((total, answer, index) => 
+                total + (answer === questions[index].answer ? 1 : 0), 0);
+            
+            const scoreElement = document.querySelector('.results-score');
+            scoreElement.textContent = `${correctAnswers}/18`;
+
+            const feedbackElement = document.querySelector('.results-feedback');
+            let feedback = '';
+            if (correctAnswers === 18) {
+                feedback = '完璧な成績です！素晴らしい理解力を示されました。';
+            } else if (correctAnswers >= 15) {
+                feedback = '素晴らしい成績です！わずかな改善点を確認してみましょう。';
+            } else if (correctAnswers >= 12) {
+                feedback = '良い成績です。さらなる向上の余地があります。';
+            } else {
+                feedback = 'もう一度内容を見直してみましょう。';
+            }
+            feedbackElement.textContent = feedback;
+
+            const reviewContainer = document.querySelector('.review-answers');
+            reviewContainer.innerHTML = questions.map((question, index) => `
+                <div class="review-item ${selectedAnswers[index] === question.answer ? 'correct' : 'incorrect'}">
+                    <div><strong>Q${question.number}:</strong> ${question.text}</div>
+                    <div>あなたの回答: ${question.options[selectedAnswers[index]]}</div>
+                    <div>正解: ${question.options[question.answer]}</div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('prev').addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                updateQuestion();
+            }
+        });
+
+        document.getElementById('next').addEventListener('click', () => {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                updateQuestion();
+            } else {
+                showResults();
+            }
+        });
+
+        document.querySelector('.restart-button').addEventListener('click', () => {
+            currentQuestion = 0;
+            selectedAnswers = new Array(questions.length).fill(null);
+            document.getElementById('quiz-content').style.display = 'block';
+            document.getElementById('results-content').style.display = 'none';
+            updateQuestion();
+        });
+
+        // Initialize the first question
+        updateQuestion();
+    </script>
+</body>
+</html>

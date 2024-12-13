@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  createdAt DateTime @default(now())
+  answers   Answer[]
+  results   Result[]
+}
+
+model Quiz {
+  id            Int      @id @default(autoincrement())
+  question      String
+  options       String
+  category      String   // 対立カテゴリー
+  correctOption Int
+  isVisible     Boolean  @default(true)
+  order         Int      @default(0)
+  answers       Answer[]
+}
+
+model Answer {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  quizId    Int
+  selected  Int      // 選択した回答のインデックス
+  correct   Boolean
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  quiz      Quiz     @relation(fields: [quizId], references: [id])
+}
+
+model Result {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  score     Int
+  category  String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, category])
+}
